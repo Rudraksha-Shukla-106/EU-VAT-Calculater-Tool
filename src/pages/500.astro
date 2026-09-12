@@ -2,9 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 <BaseLayout
-  title="Page not found (404) — VatSnap"
-  description="This page does not exist. Try the free EU VAT calculator or browse country VAT rates."
-  canonicalPath="/404/"
+  title="Something went wrong (500) — VatSnap"
+  description="Something went wrong on our side. Try again or head back to the free EU VAT calculator."
+  canonicalPath="/500/"
   robots="noindex, follow"
 >
   <style>
@@ -27,15 +27,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .error-links a { display: inline-block; padding: 10px 6px; min-height: 44px; }
   </style>
   <div class="error-wrap">
-    <p class="error-code" aria-hidden="true">404</p>
-    <h1>Page not found</h1>
-    <p class="lede">That URL doesn't exist (or it moved). The calculator and all country rates are one click away.</p>
+    <p class="error-code" aria-hidden="true">500</p>
+    <h1>Something went wrong</h1>
+    <p class="lede">That's on us, not you. Your data is safe — calculations run in your browser, so just try again or head back to the calculator.</p>
     <div class="error-actions">
+      <button class="btn btn-secondary" type="button" onclick="location.reload()">Try again</button>
       <a class="btn" href="/">Back to calculator</a>
-      <a class="btn btn-secondary" href="/vat-rate/">All country rates</a>
     </div>
     <p class="error-links meta">
-      Or try: <a href="/widget/">Embed the widget</a> · <a href="/about/">About VatSnap</a>
+      Or try: <a href="/vat-rate/">All country rates</a> · <a href="/about/">About VatSnap</a>
     </p>
   </div>
 </BaseLayout>
