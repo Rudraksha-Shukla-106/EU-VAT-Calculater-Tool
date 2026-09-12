@@ -1,0 +1,77 @@
+---
+import { COUNTRIES, calculatorPayload } from '../lib/vat';
+
+const payload = calculatorPayload();
+// Minimal standalone page designed to be iframed by third-party sites.
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VatSnap Mini VAT Calculator</title>
+  <meta name="description" content="Free mini EU VAT calculator — embed on any site." />
+  <meta name="robots" content="noindex" />
+  <style>
+    :root { --ink:#14213d; --muted:#4d5a73; --line:#e2e5ea; --accent:#1e3a5f; --soft:#eceff4; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color:var(--ink); background:#f5f6f8; padding:16px; }
+    h1 { font-family:Fraunces, Georgia, serif; font-weight:600; font-size:1.15rem; margin:0 0 10px; }
+    label { font-weight:600; display:block; margin:10px 0 4px; font-size:.9rem; }
+    select, input { width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); font-size:.95rem; background:#fff; color:var(--ink); min-height:44px; max-width:100%; }
+    select:focus-visible, input:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+    .results { background:var(--soft); border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-top:12px; font-size:.95rem; overflow-wrap:anywhere; }
+    .results dl { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 12px; margin:0; }
+    .results dd { margin:0; font-weight:700; text-align:right; overflow-wrap:anywhere; word-break:break-word; }
+    .note { font-size:.75rem; color:var(--muted); margin-top:8px; }
+    .brand { font-size:.78rem; margin-top:10px; }
+  </style>
+</head>
+<body>
+  <h1>VatSnap mini calculator</h1>
+  <div data-vat-mini data-payload={payload}>
+    <label for="m-country">Country</label>
+    <select id="m-country" data-role="country">
+      {COUNTRIES.map((c) => (
+        <option value={c.code}>{c.flag} {c.name} — {c.standard}%</option>
+      ))}
+    </select>
+    <label for="m-amount">Net price</label>
+    <input id="m-amount" data-role="amount" type="number" min="0" step="0.01" value="100" />
+    <div class="results" aria-live="polite">
+      <dl>
+        <dt>VAT</dt><dd data-role="vat">—</dd>
+        <dt>Total</dt><dd data-role="total">—</dd>
+      </dl>
+    </div>
+    <p class="note">Guidance only — confirm with an accountant or the EU TEDB source.</p>
+    <p class="brand"><a href="https://vatsnap.example.com/" target="_blank" rel="noopener">Powered by VatSnap</a></p>
+  </div>
+  <script>
+    (function () {
+      var root = document.querySelector('[data-vat-mini]');
+      if (!root) return;
+      var data = JSON.parse(root.getAttribute('data-payload') || '{}');
+      var sel = root.querySelector('[data-role="country"]');
+      var amt = root.querySelector('[data-role="amount"]');
+      var vatEl = root.querySelector('[data-role="vat"]');
+      var totEl = root.querySelector('[data-role="total"]');
+      function fmt(v, l, c) {
+        try { return new Intl.NumberFormat(l, { style: 'currency', currency: c }).format(v); }
+        catch (e) { return v.toFixed(2) + ' ' + c; }
+      }
+      function update() {
+        var e = data[sel.value];
+        if (!e) return;
+        var net = Math.max(0, Number(amt.value) || 0);
+        var vat = (net * e.s) / 100;
+        vatEl.textContent = fmt(vat, e.l, e.c) + ' (' + e.s + '%)';
+        totEl.textContent = fmt(net + vat, e.l, e.c);
+      }
+      sel.addEventListener('change', update);
+      amt.addEventListener('input', update);
+      update();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="About VatSnap — Free, Unofficial EU VAT Tool"
+  description="VatSnap is a free, unofficial EU VAT rate calculator for small online sellers. Rates come from the open-source eu-vat-rates-data package (EU TEDB source)."
+  canonicalPath="/about/"
+>
+  <h1>About VatSnap</h1>
+  <p class="lede">
+    VatSnap is a free, unofficial VAT rate calculator built for small online
+    sellers — Etsy, Shopify, Amazon and independent shops selling into the EU.
+  </p>
+  <div class="card">
+    <h2>Where the numbers come from</h2>
+    <p>
+      Every rate on this site is bundled at build time from the open-source
+      <code>eu-vat-rates-data</code> npm package, which tracks the European
+      Commission's Taxes in Europe Database (TEDB). No rate is ever typed by
+      hand into the UI — the calculator reads the dataset directly, so updates
+      to the package flow straight through on the next build.
+    </p>
+    <h2>Important disclaimer</h2>
+    <p>
+      VatSnap is a guidance tool, not tax advice. VAT treatment depends on
+      place of supply, customer status, product category, thresholds and
+      exemptions that this calculator cannot know. Always confirm rates and
+      filing obligations with a qualified accountant or the official EU TEDB
+      source before invoicing or filing.
+    </p>
+    <h2>Cost &amp; privacy</h2>
+    <p>
+      The site is fully static — no backend, no database, no accounts, no
+      tracking. Calculations happen in your browser, and hosting on Cloudflare
+      Pages costs $0.
+    </p>
+  </div>
+</BaseLayout>

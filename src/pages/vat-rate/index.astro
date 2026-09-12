@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { COUNTRIES } from '../../lib/vat';
+
+function band(standard: number): string {
+  if (standard < 20) return 'var(--tint-low)';
+  if (standard > 23) return 'var(--tint-high)';
+  return 'var(--tint-mid)';
+}
+---
+<BaseLayout
+  title="All EU VAT Rates 2026 — VatSnap"
+  description="Standard and reduced VAT rates for all 27 EU member states plus the UK, sourced from the official EU TEDB dataset. Pick a country for its calculator and FAQ."
+  canonicalPath="/vat-rate/"
+>
+  <h1>All country VAT rates</h1>
+  <p class="lede">Every rate below comes straight from the <code>eu-vat-rates-data</code> package (EU TEDB source). Click through for the calculator, explanation and FAQs.</p>
+  <ul class="country-list">
+    {COUNTRIES.map((c) => (
+      <li>
+        <a href={`/vat-rate/${c.slug}/`} style={`--w: ${Math.round((c.standard / 27) * 100)}%; --tint: ${band(c.standard)};`}>
+          <span class="bar" aria-hidden="true"></span>
+          <span class="flag" aria-hidden="true">{c.flag}</span>
+          <span class="rate-name">{c.name}{c.code === 'GB' ? ' (non-EU)' : ''}<small>{c.reduced.length ? `Reduced ${c.reduced.join('%, ')}%` : 'No reduced rates'}</small></span>
+          <span class="rate-num">{c.standard}%</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>

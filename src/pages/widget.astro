@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { COUNTRIES, DATA_VERSION } from '../lib/vat';
+
+const snippet = `<iframe
+  src="https://vatsnap.example.com/embed/"
+  width="340" height="460"
+  style="border:1px solid #e6ebf2;border-radius:12px;max-width:100%"
+  loading="lazy"
+  title="VatSnap mini VAT calculator"></iframe>
+<br><a href="https://vatsnap.example.com/">Powered by VatSnap — free EU VAT calculator</a>`;
+---
+<BaseLayout
+  title="Embed the Free VAT Calculator — VatSnap Widget"
+  description="Embed a free mini EU VAT calculator on your own site with one iframe snippet. Includes a Powered by VatSnap link."
+  canonicalPath="/widget/"
+>
+  <h1>Embed VatSnap on your site</h1>
+  <p class="lede">
+    One snippet, zero dependencies. The mini calculator (27 EU countries + UK,
+    data last verified {DATA_VERSION}) runs entirely client-side.
+  </p>
+  <div class="card">
+    <h2>1. Copy this snippet</h2>
+    <code class="snippet">{snippet}</code>
+    <h2>2. Live preview</h2>
+    <ul class="country-list" aria-label="Included countries preview">
+      {COUNTRIES.slice(0, 6).map((c) => (
+        <li>
+          <a href={`/vat-rate/${c.slug}/`} style={`--w: ${Math.round((c.standard / 27) * 100)}%; --tint: ${c.standard < 20 ? 'var(--tint-low)' : c.standard > 23 ? 'var(--tint-high)' : 'var(--tint-mid)'};`}>
+            <span class="bar" aria-hidden="true"></span>
+            <span class="flag" aria-hidden="true">{c.flag}</span>
+            <span class="rate-name">{c.name}</span>
+            <span class="rate-num">{c.standard}%</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="meta">Full widget lives at <a href="/embed/">/embed/</a> — link back with “Powered by VatSnap” so the free ride keeps going. ♥</p>
+    <p><a class="btn" href="/embed/">Open the standalone widget</a></p>
+  </div>
+</BaseLayout>

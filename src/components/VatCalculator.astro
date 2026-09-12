@@ -1,0 +1,184 @@
+---
+import { COUNTRIES, calculatorPayload, DATA_VERSION, DATA_SOURCE } from '../lib/vat';
+
+interface Props {
+  defaultCode?: string;
+  id?: string;
+}
+
+const { defaultCode = 'DE', id = 'calc' } = Astro.props as Props;
+const payload = calculatorPayload();
+const prefix = id;
+---
+<section class="card calc-panel" aria-labelledby={`${prefix}-heading`}>
+  <h2 id={`${prefix}-heading`}>VAT calculator</h2>
+  <p class="meta">
+    <span class="verified-note"><span class="dot" aria-hidden="true"></span>Rates verified {DATA_VERSION} · {DATA_SOURCE}</span><br />
+    All rates load from the <code>eu-vat-rates-data</code> dataset — nothing is hardcoded.
+  </p>
+  <div
+    class="calc"
+    data-vat-calc={prefix}
+    data-payload={payload}
+    data-default={defaultCode}
+  >
+    <div class="row row-2">
+      <div>
+        <label for={`${prefix}-country`}>Country</label>
+        <select id={`${prefix}-country`} data-role="country" aria-label="Select country">
+          {COUNTRIES.map((c) => (
+            <option value={c.code} selected={c.code === defaultCode}>
+              {c.flag} {c.name}{c.code === 'GB' ? ' (non-EU, reference)' : ''} — {c.standard}%
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label for={`${prefix}-amount`}>Price</label>
+        <input
+          id={`${prefix}-amount`}
+          data-role="amount"
+          type="number"
+          inputmode="decimal"
+          min="0"
+          step="0.01"
+          value="100"
+          aria-label="Enter price"
+          aria-describedby={`${prefix}-hint`}
+        />
+        <p class="meta" id={`${prefix}-hint`}>Enter the amount, then choose whether it is net or gross.</p>
+      </div>
+    </div>
+    <div class="row row-2">
+      <div>
+        <label for={`${prefix}-mode`}>Price type</label>
+        <select id={`${prefix}-mode`} data-role="mode" aria-label="Price type">
+          <option value="net">Net (add VAT)</option>
+          <option value="gross">Gross (extract VAT)</option>
+        </select>
+      </div>
+      <div>
+        <label for={`${prefix}-ratetype`}>Rate</label>
+        <select id={`${prefix}-ratetype`} data-role="ratetype" aria-label="Rate type"></select>
+      </div>
+    </div>
+    <div class="disclaimer" role="note">
+      <strong>Guidance only:</strong> rates are for quick estimates. Confirm with your
+      accountant or the official EU TEDB source before filing or invoicing.
+    </div>
+    <div class="results" aria-live="polite" aria-atomic="true">
+      <dl>
+        <dt>Country</dt><dd data-role="out-country">—</dd>
+        <dt>Rate applied</dt><dd data-role="out-rate">—</dd>
+        <dt>VAT amount</dt><dd data-role="out-vat">—</dd>
+        <dt>Total (gross)</dt><dd data-role="out-total">—</dd>
+        <dt>Net</dt><dd data-role="out-net">—</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Vanilla-TS island: runs in the browser, reads rates from the embedded
+  // JSON payload (rendered server-side from `eu-vat-rates-data`), so no
+  // API call and no hardcoded percentages anywhere.
+  interface Entry { n: string; c: string; l: string; s: number; r: number[]; f: string; }
+  function fmt(value: number, locale: string, currency: string): string {
+    try {
+      return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
+    } catch {
+      return new Intl.NumberFormat('en-IE', { style: 'currency', currency }).format(value);
+    }
+  }
+  function init(root: HTMLElement): void {
+    const payload = root.getAttribute('data-payload') ?? '{}';
+    const data = JSON.parse(payload) as Record<string, Entry>;
+    const country = root.querySelector<HTMLSelectElement>('[data-role="country"]')!;
+    const amount = root.querySelector<HTMLInputElement>('[data-role="amount"]')!;
+    const mode = root.querySelector<HTMLSelectElement>('[data-role="mode"]')!;
+    const ratetype = root.querySelector<HTMLSelectElement>('[data-role="ratetype"]')!;
+    const outCountry = root.querySelector('[data-role="out-country"]')!;
+    const outRate = root.querySelector('[data-role="out-rate"]')!;
+    const outVat = root.querySelector('[data-role="out-vat"]')!;
+    const outTotal = root.querySelector('[data-role="out-total"]')!;
+    const outNet = root.querySelector('[data-role="out-net"]')!;
+    // Previous displayed amounts for the count-up animation (visual only —
+    // the math below is unchanged).
+    const prev = { vat: 0, gross: 0, net: 0 };
+    let firstRun = true;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function tick(el: Element): void {
+      if (reduceMotion) return;
+      el.classList.remove('result-tick');
+      void (el as HTMLElement).offsetWidth;
+      el.classList.add('result-tick');
+    }
+
+    function animateAmount(el: Element, from: number, to: number, format: (v: number) => string): void {
+      if (reduceMotion || firstRun || from === to) {
+        el.textContent = format(to);
+        return;
+      }
+      const dur = 320;
+      const start = performance.now();
+      function frame(now: number): void {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = format(from + (to - from) * eased);
+        if (t < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function rebuildRates(): void {
+      const e = data[country.value];
+      if (!e) return;
+      ratetype.innerHTML = '';
+      const std = document.createElement('option');
+      std.value = String(e.s);
+      std.textContent = `Standard — ${e.s}%`;
+      ratetype.appendChild(std);
+      e.r.forEach((r: number, i: number) => {
+        const o = document.createElement('option');
+        o.value = String(r);
+        o.textContent = `Reduced ${i + 1} — ${r}%`;
+        ratetype.appendChild(o);
+      });
+    }
+
+    function update(): void {
+      const e = data[country.value];
+      if (!e) return;
+      const price = Number(amount.value);
+      const rate = Number(ratetype.value || e.s);
+      const safe = Number.isFinite(price) && price >= 0 ? price : 0;
+      let net: number; let vat: number; let gross: number;
+      if (mode.value === 'gross') {
+        gross = safe;
+        net = gross / (1 + rate / 100);
+        vat = gross - net;
+      } else {
+        net = safe;
+        vat = (net * rate) / 100;
+        gross = net + vat;
+      }
+      outCountry.textContent = `${e.f} ${e.n}`;
+      outRate.textContent = `${rate}%`;
+      animateAmount(outVat, prev.vat, vat, (v) => fmt(v, e.l, e.c));
+      animateAmount(outTotal, prev.gross, gross, (v) => fmt(v, e.l, e.c));
+      animateAmount(outNet, prev.net, net, (v) => fmt(v, e.l, e.c));
+      prev.vat = vat; prev.gross = gross; prev.net = net;
+      firstRun = false;
+      tick(outVat); tick(outTotal); tick(outNet);
+    }
+
+    country.addEventListener('change', () => { rebuildRates(); update(); });
+    amount.addEventListener('input', update);
+    mode.addEventListener('change', update);
+    ratetype.addEventListener('change', update);
+    rebuildRates();
+    update();
+  }
+  document.querySelectorAll<HTMLElement>('[data-vat-calc]').forEach(init);
+</script>

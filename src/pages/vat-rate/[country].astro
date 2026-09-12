@@ -1,0 +1,135 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import VatCalculator from '../../components/VatCalculator.astro';
+import { COUNTRIES, DATA_VERSION, DATA_SOURCE, formatMoney, formatRate } from '../../lib/vat';
+import { DESCRIPTIONS } from '../../lib/descriptions';
+
+/**
+ * HOW PROGRAMMATIC COUNTRY PAGES WORK
+ * -----------------------------------
+ * Astro's dynamic route pattern: this file is `src/pages/vat-rate/[country].astro`.
+ * At build time Astro calls `getStaticPaths()` below, which loops over every
+ * country in the `eu-vat-rates-data` package (27 EU members + GB) and returns
+ * one `{ params: { country: slug }, props: {...} }` entry per country.
+ * Astro then renders this template once per entry, emitting pure static HTML
+ * files like `/vat-rate/germany/index.html`, `/vat-rate/france/index.html`, …
+ * No server, no database — just a build-time loop over offline JSON data.
+ */
+export async function getStaticPaths() {
+  return COUNTRIES.map((c) => ({
+    params: { country: c.slug },
+    props: { code: c.code },
+  }));
+}
+
+import { COUNTRY_BY_CODE } from '../../lib/vat';
+const { code } = Astro.props as { code: string };
+const c = COUNTRY_BY_CODE[code];
+if (!c) throw new Error(`Unknown country code: ${code}`);
+
+const paras = DESCRIPTIONS[c.slug] ?? [];
+const isGB = c.code === 'GB';
+const displayName = isGB ? `${c.name} (non-EU, shown for reference)` : c.name;
+const year = (DATA_VERSION || '2026').slice(0, 4);
+const title = `${c.name} VAT Rate ${year} — ${formatRate(c.standard)} Standard Rate | VatSnap`;
+const description = `${c.name} standard VAT rate is ${formatRate(c.standard)}${c.reduced.length ? `, with reduced rates of ${c.reduced.map(formatRate).join(', ')}` : ', with no reduced rates'} (last verified ${DATA_VERSION}). Free calculator for sellers shipping to ${c.name}.`;
+
+const reducedText = c.reduced.length ? c.reduced.map(formatRate).join(', ') : 'none';
+const faqItems = [
+  {
+    q: `What is the standard VAT rate in ${c.name}?`,
+    a: `The standard VAT rate in ${c.name} (${c.vatName}, ${c.vatAbbr}) is ${formatRate(c.standard)}, according to the eu-vat-rates-data package (source: ${DATA_SOURCE}, last verified ${DATA_VERSION}). Most goods sold to ${c.name === 'United Kingdom' ? 'British' : c.name} customers use this rate.`,
+  },
+  {
+    q: c.reduced.length
+      ? `Does ${c.name} have reduced VAT rates?`
+      : `Does ${c.name} have any reduced VAT rates?`,
+    a: c.reduced.length
+      ? `Yes — ${c.name} applies reduced rates of ${reducedText}${c.superReduced != null ? `, plus a ${formatRate(c.superReduced)} super-reduced rate` : ''}${c.parking != null ? ` and a ${formatRate(c.parking)} parking rate` : ''}. They cover only the categories defined in national law; everything else uses the ${formatRate(c.standard)} standard rate.`
+      : `No — ${c.name} applies a single flat ${formatRate(c.standard)} rate with no reduced bands, so every taxable sale carries the same rate.`,
+  },
+  {
+    q: `What is the VAT rate in ${c.name} for digital products?`,
+    a: isGB
+      ? `The UK is outside the EU VAT system, so EU One-Stop Shop (OSS) rules do not apply. Digital sales to UK consumers follow separate HMRC rules at the UK rates above — confirm with an accountant before invoicing.`
+      : `B2C digital products sold to consumers in ${c.name} are generally taxed at ${c.name}'s applicable VAT rate (${formatRate(c.standard)} standard unless a reduced band explicitly covers the product). Cross-border sellers can usually report this through the EU One-Stop Shop (OSS) instead of registering locally — confirm with an accountant or the official EU TEDB source.`,
+  },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqItems.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+const appSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: `${c.name} VAT Calculator — VatSnap`,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: c.currency },
+  description,
+};
+const exampleNet = 100;
+const exampleVat = (exampleNet * c.standard) / 100;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath={`/vat-rate/${c.slug}/`}
+  schema={[appSchema, faqSchema]}
+>
+  <p><a href="/vat-rate/">← All countries</a></p>
+  <h1><span class="flag" aria-hidden="true">{c.flag}</span> {displayName}: {formatRate(c.standard)} VAT</h1>
+  <p class="meta">
+    {c.vatName} ({c.vatAbbr}) · Currency: {c.currency} · Last verified: {DATA_VERSION} · Source: {DATA_SOURCE}
+  </p>
+
+  <div class="card" aria-label="Rate summary">
+    <table class="rates">
+      <tbody>
+        <tr><th scope="row">Standard rate</th><td><strong>{formatRate(c.standard)}</strong></td></tr>
+        <tr><th scope="row">Reduced rates</th><td>{reducedText}</td></tr>
+        <tr><th scope="row">Super-reduced</th><td>{c.superReduced != null ? formatRate(c.superReduced) : '—'}</td></tr>
+        <tr><th scope="row">Parking rate</th><td>{c.parking != null ? formatRate(c.parking) : '—'}</td></tr>
+        <tr><th scope="row">Example</th><td>{formatMoney(exampleNet, c.locale, c.currency)} net + {formatMoney(exampleVat, c.locale, c.currency)} VAT = {formatMoney(exampleNet + exampleVat, c.locale, c.currency)} total</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  {paras.map((p) => <p>{p}</p>)}
+
+  <!-- Calculator is pre-set to THIS country via defaultCode, so visitors
+       landing here never have to search for it again. -->
+  <VatCalculator defaultCode={c.code} id={`calc-${c.slug}`} />
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    {faqItems.map((f) => (
+      <details>
+        <summary>{f.q}</summary>
+        <p>{f.a}</p>
+      </details>
+    ))}
+  </div>
+
+  <h2>Other countries</h2>
+  <ul class="country-list">
+    {COUNTRIES.filter((o) => o.code !== c.code).slice(0, 8).map((o) => (
+      <li>
+        <a href={`/vat-rate/${o.slug}/`} style={`--w: ${Math.round((o.standard / 27) * 100)}%; --tint: ${o.standard < 20 ? 'var(--tint-low)' : o.standard > 23 ? 'var(--tint-high)' : 'var(--tint-mid)'};`}>
+          <span class="bar" aria-hidden="true"></span>
+          <span class="flag" aria-hidden="true">{o.flag}</span>
+          <span class="rate-name">{o.name}<small>{o.reduced.length ? `Reduced ${o.reduced.join('%, ')}%` : 'No reduced rates'}</small></span>
+          <span class="rate-num">{o.standard}%</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+  <p><a href="/vat-rate/">See all {COUNTRIES.length} countries →</a></p>
+</BaseLayout>

@@ -1,0 +1,274 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import VatCalculator from '../components/VatCalculator.astro';
+import { COUNTRIES, DATA_VERSION, DATA_SOURCE } from '../lib/vat';
+
+const webAppSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'VatSnap — Free EU VAT Calculator',
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+  description:
+    'Free EU VAT calculator for small online sellers. Select a country, enter a price, and instantly see the VAT amount and total.',
+};
+
+const faqs = [
+  {
+    q: 'What is VAT?',
+    a: 'VAT (Value Added Tax) is a consumption tax charged on most goods and services sold in the EU. The seller adds it to the price, collects it from the buyer, and passes it to the tax authority — the cost lands on the final consumer, while VAT-registered businesses along the chain generally reclaim the VAT they pay.',
+  },
+  {
+    q: 'What is the VAT rate in Germany?',
+    a: 'The standard VAT rate in Germany (Mehrwertsteuer) is 19%, with a single 7% reduced rate for qualifying everyday items. For full details and a preset calculator, see the dedicated <a href="/vat-rate/germany/">VAT calculator for Germany</a>.',
+  },
+  {
+    q: 'What is the VAT rate in France?',
+    a: 'The standard VAT rate in France (TVA) is 20%, with additional reduced rates of 10% and 5.5%, plus a 2.1% super-reduced rate. Corsica and the overseas departments apply their own special rates. See the <a href="/vat-rate/france/">VAT calculator for France</a> for the full breakdown.',
+  },
+  {
+    q: 'How do I calculate VAT from a price?',
+    a: 'Take the net (VAT-exclusive) price and multiply it by the rate: VAT amount equals net price times rate divided by 100, and the gross total is net plus VAT. For example, \u20AC100 net at Germany\u2019s 19% rate gives \u20AC19 VAT and a \u20AC119 total. The calculator above does this instantly — choose \u201CNet (add VAT)\u201D.',
+  },
+  {
+    q: 'How do I calculate VAT backwards from a total (gross to net)?',
+    a: 'Divide the gross (VAT-inclusive) price by one plus the rate as a decimal to recover the net amount, then subtract to find the VAT. For example, a \u20AC119 gross sale at 19% works back to \u20AC100 net with \u20AC19 of VAT. In the calculator, choose \u201CGross (extract VAT)\u201D to reverse-calculate any total.',
+  },
+  {
+    q: 'Do I need to charge VAT to EU customers?',
+    a: 'In most cases, yes — sales to private consumers in the EU are taxed in the buyer\u2019s country at that country\u2019s rate. Sales to VAT-registered businesses in another EU country are often zero-rated with reverse charge instead. Because the correct treatment depends on your customer type, product and seller location, confirm with your accountant before invoicing.',
+  },
+  {
+    q: 'What is the difference between net and gross price?',
+    a: 'The net price excludes VAT; the gross price includes it. EU consumer prices must generally be displayed gross, while business quotes are often net with VAT added at invoicing. This tool converts either direction: net-to-gross builds a shelf price, gross-to-net breaks one back down for margin checks.',
+  },
+  {
+    q: 'Is there a free VAT calculator?',
+    a: 'Yes — this one. VatSnap is a free VAT calculator with no signup, no usage limits and no paid tier. It runs entirely in your browser using VAT rates bundled from the open-source eu-vat-rates-data package (source: European Commission TEDB).',
+  },
+  {
+    q: 'What is the OSS (One Stop Shop) scheme?',
+    a: 'The EU One-Stop Shop lets sellers report cross-border sales to consumers in other EU countries through a single VAT return in their home country, instead of registering for VAT in every country they sell into. It most commonly covers B2C goods and digital services — your accountant can confirm whether your sales qualify.',
+  },
+  {
+    q: 'Do I need to register for VAT in every EU country I sell to?',
+    a: 'Usually not. Cross-border consumer sales can generally be reported through the One-Stop Shop (OSS) with a single registration, which is exactly the situation this OSS VAT calculator is built for. Separate local registrations are still needed in some cases — for example if you hold stock in another country — so confirm your position with an accountant.',
+  },
+  {
+    q: 'What is the VAT rate for digital goods in the EU?',
+    a: 'B2C digital goods sold to EU consumers are generally taxed at the buyer\u2019s country rate — the standard rate unless a reduced band explicitly covers the product. A digital goods VAT calculator for the EU therefore needs the buyer\u2019s country first; cross-border sellers can usually report the VAT through the One-Stop Shop rather than registering locally.',
+  },
+  {
+    q: 'Which EU country has the lowest VAT rate?',
+    a: 'Luxembourg, at 17% standard — the lowest headline rate in the EU — followed by Malta at 18%. See the <a href="/vat-rate/luxembourg/">Luxembourg VAT page</a> for its reduced rates and calculator.',
+  },
+  {
+    q: 'Which EU country has the highest VAT rate?',
+    a: 'Hungary, at 27% standard — the highest headline rate in the EU — with Denmark, Sweden and Croatia next at 25%. See the <a href="/vat-rate/hungary/">Hungary VAT page</a> for details.',
+  },
+  {
+    q: 'How often do EU VAT rates change?',
+    a: `National VAT rates change infrequently, but they do change — which is why VatSnap reads every number from the eu-vat-rates-data package instead of hardcoding them. The package is checked against the EU TEDB source, and the rates on this site were last verified ${DATA_VERSION}.`,
+  },
+  {
+    q: 'Do I charge VAT to non-EU customers?',
+    a: 'Sales shipped or supplied outside the EU are generally outside EU VAT — exports of goods, for example, are typically zero-rated rather than charged at the domestic rate. The exact paperwork and proof of export required depend on your country and what you sell, so confirm with your accountant before zero-rating an order.',
+  },
+  {
+    q: 'Does this VAT calculator work for the UK?',
+    a: 'Yes — the United Kingdom is included for reference at a 20% standard rate with a 5% reduced rate. Note the UK is not an EU member, so EU schemes like the One-Stop Shop do not cover UK sales; UK VAT follows separate HMRC rules. See the <a href="/vat-rate/united-kingdom/">VAT calculator for the UK</a>.',
+  },
+  {
+    q: 'Where do the VAT rates on this site come from?',
+    a: `Every rate comes from the eu-vat-rates-data package, which tracks the European Commission TEDB. The rates on this page were last verified ${DATA_VERSION}. Rates are guidance only — confirm with your accountant or the official EU source before filing. Browse all rates in the <a href="/vat-rate/">VAT calculator Europe index</a>.`,
+  },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+
+function band(standard: number): string {
+  if (standard < 20) return 'var(--tint-low)';
+  if (standard > 23) return 'var(--tint-high)';
+  return 'var(--tint-mid)';
+}
+function width(standard: number): string {
+  return `${Math.round((standard / 27) * 100)}%`;
+}
+---
+<BaseLayout
+  title="VAT Calculator | Free EU VAT Calculator by Country – VatSnap"
+  description="Free VAT calculator for Europe: look up EU VAT rates by country and compute VAT-inclusive and exclusive prices. Built for Etsy, Shopify sellers and freelancers."
+  canonicalPath="/"
+  schema={[webAppSchema, faqSchema]}
+>
+  <div class="hero">
+    <svg class="hero-motif" viewBox="0 0 520 360" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="currentColor" style="color: var(--accent)" opacity="0.16">
+        {Array.from({ length: 9 }).map((_, i) => (
+          <line x1="0" y1={20 + i * 40} x2="520" y2={20 + i * 40} stroke-width="1" />
+        ))}
+        {Array.from({ length: 13 }).map((_, i) => (
+          <line x1={20 + i * 40} y1="0" x2={20 + i * 40} y2="360" stroke-width="1" />
+        ))}
+        <circle cx="260" cy="150" r="72" stroke-width="1.5" stroke-dasharray="5 6" />
+        <circle cx="260" cy="150" r="44" stroke-width="1.5" />
+        <circle cx="150" cy="90" r="3" fill="currentColor" stroke="none" />
+        <circle cx="370" cy="110" r="3" fill="currentColor" stroke="none" />
+        <circle cx="330" cy="240" r="3" fill="currentColor" stroke="none" />
+        <circle cx="180" cy="250" r="3" fill="currentColor" stroke="none" />
+        <path d="M150 90 260 150l110-40M180 250l80-100 70 90" stroke-width="1.5" />
+      </g>
+    </svg>
+    <div class="hero-inner">
+      <p class="trust-line">A free calculator for small sellers shipping into Europe, built on official TEDB-sourced rates.</p>
+      <ul class="mini-badges" aria-label="Key facts">
+        <li><span class="dot" aria-hidden="true"></span>Free, no signup</li>
+        <li><span class="dot" aria-hidden="true"></span>Works offline from bundled data</li>
+        <li><span class="dot dot-gold" aria-hidden="true"></span>Rates verified {DATA_VERSION}</li>
+      </ul>
+      <h1>Free VAT calculator for sellers shipping into Europe</h1>
+      <p class="lede">
+        VatSnap is a free EU VAT calculator for small online sellers. Pick the
+        buyer's country, type a price, and instantly see the VAT amount and the
+        total — right in your browser, no account needed.
+      </p>
+    </div>
+  </div>
+
+  <VatCalculator defaultCode="DE" id="home" />
+
+  <div class="rate-section-head">
+    <div>
+      <h2 style="margin-bottom: 4px">VAT calculator by country</h2>
+      <p class="meta" style="margin-top: 0">All 27 EU members, plus the United Kingdom for reference. Bar length shows the standard rate at a glance.</p>
+    </div>
+    <span class="rate-scale" aria-hidden="true"><span>17%</span><span class="scale-bar"></span><span>27%</span></span>
+  </div>
+  <ul class="country-list">
+    {COUNTRIES.map((c) => (
+      <li>
+        <a href={`/vat-rate/${c.slug}/`} style={`--w: ${width(c.standard)}; --tint: ${band(c.standard)};`}>
+          <span class="bar" aria-hidden="true"></span>
+          <span class="flag" aria-hidden="true">{c.flag}</span>
+          <span class="rate-name">{c.name}{c.code === 'GB' ? ' (non-EU)' : ''}<small>{c.reduced.length ? `Reduced ${c.reduced.join('%, ')}%` : 'No reduced rates'}</small></span>
+          <span class="rate-num">{c.standard}%</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <article class="seo-copy">
+    <h2>How to calculate VAT in the EU</h2>
+    <p>
+      If you are wondering how to calculate VAT in the EU, there are only two
+      directions to learn, and this VAT rate calculator handles both. To go
+      from a net (VAT-exclusive) price to the gross price your customer pays,
+      multiply the net price by the country's VAT rate: VAT amount equals net
+      price times rate divided by 100, and the gross       total is simply net plus
+      VAT. For example, a €100 net sale to Germany, where the standard rate is
+      19%, carries €19 of VAT for a €119 VAT-inclusive total. A VAT percentage calculator does exactly this arithmetic — the skill is knowing which
+      rate applies, which is why every result on VatSnap is drawn from
+      TEDB-sourced data rather than typed in by hand.
+    </p>
+    <p>
+      The other direction is the reverse VAT calculator: starting from a gross
+      price and extracting the VAT hidden inside it. Divide the gross price by
+      one plus the rate (as a decimal) to recover the net amount, then subtract
+      to find the VAT. That same €119 gross sale in Germany works back to a
+      €100 net with €19 of VAT. Use this whenever a supplier quotes you
+      VAT-inclusive prices, or when you need to check the VAT content of your
+      own shelf prices before filing.
+    </p>
+
+    <h2>VAT inclusive vs VAT exclusive price calculator</h2>
+    <p>
+      Consumer prices across the EU are normally shown VAT inclusive — the
+      number on the tag is the number the customer pays. Business quotes, on
+      the other hand, are often VAT exclusive, with tax added at invoicing. A
+      VAT inclusive price calculator takes your net figure and adds the tax so
+      you can list compliant shelf prices, while a VAT exclusive price
+      calculator strips tax back out so you can compare supplier costs and
+      margins like-for-like. VatSnap's calculator does both jobs: choose “Net
+      (add VAT)” to build an inclusive price, or “Gross (extract VAT)” to break
+      one back down. Each country's page formats the answer in its own currency
+      and number conventions, so a German total reads “1.234,56&nbsp;€” while
+      an Irish one reads the same value the Irish way.
+    </p>
+
+    <h2>VAT calculator for Etsy sellers and Shopify sellers</h2>
+    <p>
+      A VAT calculator for Etsy sellers has one specific job: telling you the
+      tax line on goods shipped to buyers in 27 different countries without
+      making you look it up 27 times. Whether you sell printables, craft
+      supplies or vintage       finds, select the buyer's country and VatSnap applies
+      the right standard or reduced rate instantly. As a VAT calculator for Shopify sellers, it solves the same problem for your own storefront, where
+      you set the tax settings yourself and carry full responsibility for the
+      numbers. Before adding VAT on top of a marketplace order, check what your
+      platform already collected — marketplaces may handle VAT on some orders
+      themselves — and confirm your setup with an accountant so you never
+      charge the tax twice or miss it entirely.
+    </p>
+
+    <h2>Digital goods, freelancers and the OSS VAT calculator</h2>
+    <p>
+      Selling downloads, templates, courses or SaaS? A digital goods VAT calculator for the EU applies the buyer's country rate to borderless
+      products, which is exactly the case the EU's One-Stop Shop was built
+      for: instead of registering for VAT in every country you sell into, you
+      generally report cross-border consumer sales through a single OSS return
+      in your home country. An OSS VAT calculator therefore answers the rate
+      question per buyer country while your OSS registration answers the
+      filing question. The same logic makes VatSnap a practical VAT calculator for freelancers invoicing EU clients for digital services — pick the
+      client's country, compute the VAT-inclusive total, and confirm the filing
+      treatment with your accountant before you send the invoice.
+    </p>
+
+    <h2>What is the VAT rate in Germany, France or Ireland?</h2>
+    <p>
+      “What is the VAT rate in [country]?” is the question behind every page on
+      this site, and each VAT rate finder page answers it three ways: the
+      headline standard rate, every reduced rate in the dataset, and a
+      calculator preset to that country. What is the VAT rate in Germany? 19%
+      standard with a 7% reduced rate — see the dedicated
+      <a href="/vat-rate/germany/">VAT calculator for Germany</a>. What is the
+      VAT rate in France? 20% standard with several reduced rates
+      — try the <a href="/vat-rate/france/">VAT calculator for France</a>.
+      What is the VAT rate in Ireland? 23% standard with 9% and 13.5% reduced
+      rates — open the <a href="/vat-rate/ireland/">VAT calculator for Ireland</a>. The <a href="/vat-rate/united-kingdom/">VAT calculator for the UK</a> covers Britain's 20% rate for reference, and the
+      <a href="/vat-rate/">full VAT calculator Europe index</a> lists all 28
+      pages. Think of VatSnap as a vatratefinder: one search-free directory
+      where every number traces back to the same official source.
+    </p>
+  </article>
+
+  <div class="faq">
+    <h2>VAT calculator questions</h2>
+    {faqs.map((f) => (
+      <details>
+        <summary>{f.q}</summary>
+        <p>{f.a}</p>
+      </details>
+    ))}
+  </div>
+
+  <div class="grid grid-2" style="margin-top: 32px">
+    <div class="card">
+      <h3>Selling digital goods?</h3>
+      <p>Cross-border B2C digital sales in the EU can usually be reported through the One-Stop Shop (OSS) instead of registering in every country. Open any country page for the rate, then confirm your OSS setup with an accountant.</p>
+      <p><a href="/vat-rate/germany/">Example: Germany VAT rate →</a></p>
+    </div>
+    <div class="card">
+      <h3>Need VAT on your own site?</h3>
+      <p>Embed the free VatSnap mini calculator with one snippet — and get a “Powered by VatSnap” link back to us.</p>
+      <p><a class="btn" href="/widget/">Get the embed code</a></p>
+    </div>
+  </div>
+</BaseLayout>
