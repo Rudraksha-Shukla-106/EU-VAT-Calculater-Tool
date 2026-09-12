@@ -1,17 +1,25 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { COUNTRIES, DATA_VERSION } from '../lib/vat';
 ---
 <BaseLayout
-  title="About VatSnap — Free, Unofficial EU VAT Tool"
-  description="VatSnap is a free, unofficial EU VAT rate calculator for small online sellers. Rates come from the open-source eu-vat-rates-data package (EU TEDB source)."
+  title="About Us — VatSnap, Free Unofficial EU VAT Tool"
+  description="About VatSnap: a free, unofficial EU VAT rate calculator for small online sellers. Rates come from the open-source eu-vat-rates-data package (EU TEDB source)."
   canonicalPath="/about/"
 >
-  <h1>About VatSnap</h1>
+  <h1>About Us</h1>
   <p class="lede">
     VatSnap is a free, unofficial VAT rate calculator built for small online
     sellers — Etsy, Shopify, Amazon and independent shops selling into the EU.
   </p>
   <div class="card">
+    <h2>Why we built this</h2>
+    <p>
+      EU VAT rates live scattered across official tables that are hard to use
+      at checkout speed. We wanted one fast page per country — standard rate,
+      reduced rates, and a calculator preset to that country — covering all 27
+      EU members plus the UK for reference ({COUNTRIES.length} pages total).
+    </p>
     <h2>Where the numbers come from</h2>
     <p>
       Every rate on this site is bundled at build time from the open-source
@@ -19,6 +27,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       Commission's Taxes in Europe Database (TEDB). No rate is ever typed by
       hand into the UI — the calculator reads the dataset directly, so updates
       to the package flow straight through on the next build.
+      Rates shown were last verified {DATA_VERSION}.
     </p>
     <h2>Important disclaimer</h2>
     <p>
@@ -26,13 +35,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       place of supply, customer status, product category, thresholds and
       exemptions that this calculator cannot know. Always confirm rates and
       filing obligations with a qualified accountant or the official EU TEDB
-      source before invoicing or filing.
+      source before invoicing or filing. See our <a href="/terms/">Terms</a>.
     </p>
     <h2>Cost &amp; privacy</h2>
     <p>
       The site is fully static — no backend, no database, no accounts, no
-      tracking. Calculations happen in your browser, and hosting on Cloudflare
-      Pages costs $0.
+      tracking. Calculations happen in your browser. Read the full
+      <a href="/privacy/">Privacy Policy</a>.
+    </p>
+    <h2>Get in touch</h2>
+    <p>
+      Found an error or want a feature? Head to our
+      <a href="/contact/">Contact page</a> — rate corrections with an official
+      source link are especially welcome.
     </p>
   </div>
 </BaseLayout>

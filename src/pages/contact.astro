@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const EMAIL = 'hello@vatratefinder.com';
+---
+<BaseLayout
+  title="Contact Us — VatSnap"
+  description="Contact VatSnap: report a rate issue, suggest an improvement, or ask about embedding the free EU VAT calculator."
+  canonicalPath="/contact/"
+>
+  <h1>Contact Us</h1>
+  <p class="lede">
+    Spotted a wrong rate, want a feature, or need help embedding the widget?
+    We'd like to hear from you.
+  </p>
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>Email us</h2>
+      <p>
+        The fastest way to reach us is email. We read everything and reply
+        when a response is needed.
+      </p>
+      <p><a class="btn" href={`mailto:${EMAIL}?subject=${encodeURIComponent('VatSnap feedback')}`}>{EMAIL}</a></p>
+      <p class="meta">
+        Tip: for rate corrections, include the country, the rate you see, and
+        a link to the official source if you have one.
+      </p>
+    </div>
+    <div class="card">
+      <h2>Send a message</h2>
+      <p class="meta">
+        This form opens your email app with your message pre-filled — nothing
+        is sent to a server, matching our <a href="/privacy/">privacy policy</a>.
+      </p>
+      <form
+        id="contact-form"
+        onsubmit="return false;"
+      >
+        <label for="cf-name">Your name</label>
+        <input id="cf-name" name="name" type="text" autocomplete="name" placeholder="Jane Seller" style="width:100%;margin:4px 0 12px;padding:10px;border-radius:8px;border:1px solid var(--border);" />
+        <label for="cf-topic">Topic</label>
+        <select id="cf-topic" name="topic" style="width:100%;margin:4px 0 12px;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:inherit;">
+          <option>Rate correction</option>
+          <option>Feature suggestion</option>
+          <option>Embed help</option>
+          <option>Something else</option>
+        </select>
+        <label for="cf-msg">Message</label>
+        <textarea id="cf-msg" name="message" rows="5" required placeholder="How can we help?" style="width:100%;margin:4px 0 12px;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:inherit;"></textarea>
+        <button class="btn" type="submit" data-contact-submit>Open email app</button>
+      </form>
+    </div>
+  </div>
+  <div class="card" style="margin-top: 24px">
+    <h2>Before you write</h2>
+    <ul>
+      <li><a href="/about/">About VatSnap &amp; disclaimer</a> — where rates come from.</li>
+      <li><a href="/vat-rate/">All country VAT rates</a> — check the country page first.</li>
+      <li><a href="/widget/">Embed the widget</a> — one-snippet install guide.</li>
+    </ul>
+    <p class="meta">Please note: we can't provide personalised tax advice — see our <a href="/terms/">Terms</a>.</p>
+  </div>
+  <script is:inline define:vars={{ EMAIL }}>
+    (function () {
+      var form = document.getElementById('contact-form');
+      if (!form) return;
+      form.addEventListener('submit', function () {
+        var name = (document.getElementById('cf-name') || {}).value || '';
+        var topic = (document.getElementById('cf-topic') || {}).value || 'Feedback';
+        var msg = (document.getElementById('cf-msg') || {}).value || '';
+        var subject = '[VatSnap] ' + topic + (name ? ' from ' + name : '');
+        var body = (name ? 'Name: ' + name + '\n\n' : '') + msg;
+        window.location.href =
+          'mailto:' + EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      });
+    })();
+  </script>
+</BaseLayout>
