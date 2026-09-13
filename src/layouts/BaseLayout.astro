@@ -28,6 +28,15 @@ const schemaArray = schema ? (Array.isArray(schema) ? schema : [schema]) : [];
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-C0V9Y4KFDR"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-C0V9Y4KFDR');
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
@@ -63,6 +72,7 @@ const schemaArray = schema ? (Array.isArray(schema) ? schema : [schema]) : [];
     <meta property="og:image:height" content="630" />
     <meta property="og:image:type" content="image/svg+xml" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonical} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={new URL(ogImage, SITE).toString()} />

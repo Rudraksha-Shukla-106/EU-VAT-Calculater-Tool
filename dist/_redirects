@@ -1,0 +1,5 @@
+# Canonical domain: apex (non-www). Redirect all www traffic to the apex
+# with a 301 so canonical, og:url, sitemap and links stay on one version.
+https://www.vatratefinder.com/* https://vatratefinder.com/:splat 301
+http://www.vatratefinder.com/* https://vatratefinder.com/:splat 301
+http://vatratefinder.com/* https://vatratefinder.com/:splat 301
