@@ -1,0 +1,29 @@
+country,code,slug,eu_member,vat_name,vat_abbr,standard,reduced,super_reduced,parking,currency,last_verified,source
+Austria,AT,austria,yes,Umsatzsteuer,USt,20,10;13;19,4.9,,EUR,2026-08-23,European Commission TEDB
+Belgium,BE,belgium,yes,Belasting over de toegevoegde waarde,BTW,21,6;12,,12,EUR,2026-08-23,European Commission TEDB
+Bulgaria,BG,bulgaria,yes,Данък върху добавената стойност,ДДС,20,9,,,EUR,2026-08-23,European Commission TEDB
+Croatia,HR,croatia,yes,Porez na dodanu vrijednost,PDV,25,5;13,,,EUR,2026-08-23,European Commission TEDB
+Cyprus,CY,cyprus,yes,Φόρος Προστιθέμενης Αξίας,ΦΠΑ,19,5;9,3,,EUR,2026-08-23,European Commission TEDB
+Czech Republic,CZ,czech-republic,yes,Daň z přidané hodnoty,DPH,21,12,,,CZK,2026-08-23,European Commission TEDB
+Denmark,DK,denmark,yes,Moms,moms,25,,,,DKK,2026-08-23,European Commission TEDB
+Estonia,EE,estonia,yes,Käibemaks,km,24,9;13,,,EUR,2026-08-23,European Commission TEDB
+Finland,FI,finland,yes,Arvonlisävero,ALV,25.5,10;13.5,,,EUR,2026-08-23,European Commission TEDB
+France,FR,france,yes,Taxe sur la valeur ajoutée,TVA,20,0.9;1.05;5.5;8.5;10;13,2.1,,EUR,2026-08-23,European Commission TEDB
+Germany,DE,germany,yes,Mehrwertsteuer,MwSt,19,7,,,EUR,2026-08-23,European Commission TEDB
+Greece,GR,greece,yes,Φόρος Προστιθέμενης Αξίας,ΦΠΑ,24,6;13;17,4,13,EUR,2026-08-23,European Commission TEDB
+Hungary,HU,hungary,yes,Általános forgalmi adó,ÁFA,27,5;18,,,HUF,2026-08-23,European Commission TEDB
+Ireland,IE,ireland,yes,Value Added Tax,VAT,23,9;13.5,,,EUR,2026-08-23,European Commission TEDB
+Italy,IT,italy,yes,Imposta sul valore aggiunto,IVA,22,5;10,4,,EUR,2026-08-23,European Commission TEDB
+Latvia,LV,latvia,yes,Pievienotās vērtības nodoklis,PVN,21,5;12,,,EUR,2026-08-23,European Commission TEDB
+Lithuania,LT,lithuania,yes,Pridėtinės vertės mokestis,PVM,21,5;12,,,EUR,2026-08-23,European Commission TEDB
+Luxembourg,LU,luxembourg,yes,Taxe sur la valeur ajoutée,TVA,17,8;14,3,14,EUR,2026-08-23,European Commission TEDB
+Malta,MT,malta,yes,Taxxa tal-Valur Miżjud,VAT,18,5;7,,12,EUR,2026-08-23,European Commission TEDB
+Netherlands,NL,netherlands,yes,Belasting over de toegevoegde waarde,btw,21,9,,,EUR,2026-08-23,European Commission TEDB
+Poland,PL,poland,yes,Podatek od towarów i usług,VAT,23,5;8,8,,PLN,2026-08-23,European Commission TEDB
+Portugal,PT,portugal,yes,Imposto sobre o Valor Acrescentado,IVA,23,6;13;16;22,6,13,EUR,2026-08-23,European Commission TEDB
+Romania,RO,romania,yes,Taxa pe valoarea adăugată,TVA,21,11,,,RON,2026-08-23,European Commission TEDB
+Slovakia,SK,slovakia,yes,Daň z pridanej hodnoty,DPH,23,5;19,,,EUR,2026-08-23,European Commission TEDB
+Slovenia,SI,slovenia,yes,Davek na dodano vrednost,DDV,22,5;9.5,,,EUR,2026-08-23,European Commission TEDB
+Spain,ES,spain,yes,Impuesto sobre el Valor Añadido,IVA,21,10,4,,EUR,2026-08-23,European Commission TEDB
+Sweden,SE,sweden,yes,Mervärdesskatt,moms,25,6;12,,,SEK,2026-08-23,European Commission TEDB
+United Kingdom,GB,united-kingdom,no,Value Added Tax,VAT,20,5,,,GBP,2026-08-23,European Commission TEDB

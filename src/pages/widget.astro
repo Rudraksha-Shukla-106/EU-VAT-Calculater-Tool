@@ -8,7 +8,7 @@ const snippet = `<iframe
   style="border:1px solid #e6ebf2;border-radius:12px;max-width:100%"
   loading="lazy"
   title="VatSnap mini VAT calculator"></iframe>
-<br><a href="https://vatratefinder.com/">Powered by VatSnap — free EU VAT calculator</a>`;
+<br><a href="https://vatratefinder.com/">Free EU VAT calculator by VatSnap</a>`;
 ---
 <BaseLayout
   title="Embed the Free VAT Calculator — VatSnap Widget"
@@ -22,8 +22,26 @@ const snippet = `<iframe
   </p>
   <div class="card">
     <h2>1. Copy this snippet</h2>
-    <code class="snippet">{snippet}</code>
+    <pre class="snippet" id="embed-snippet" tabindex="0">{snippet}</pre>
+    <p><button class="btn" type="button" data-copy-snippet>Copy embed code</button> <span class="meta" data-copy-status role="status" aria-live="polite"></span></p>
     <h2>2. Live preview</h2>
+    <p class="meta">Exactly what your visitors will see:</p>
+    <iframe
+      src="/embed/"
+      width="340"
+      height="460"
+      style="border:1px solid #e6ebf2;border-radius:12px;max-width:100%"
+      loading="lazy"
+      title="Live preview of the VatSnap mini VAT calculator"></iframe>
+    <h2>3. Who can use it</h2>
+    <p>
+      Bloggers writing about EU selling, accountants sharing resources with
+      clients, marketplace consultants, and course creators teaching VAT —
+      anyone may embed the widget for free. The “Free EU VAT calculator by
+      VatSnap” link below the widget is a normal followable link back to our
+      homepage; please keep it so the free ride keeps going.
+    </p>
+    <h2>Included countries</h2>
     <ul class="country-list" aria-label="Included countries preview">
       {COUNTRIES.slice(0, 6).map((c) => (
         <li>
@@ -36,7 +54,34 @@ const snippet = `<iframe
         </li>
       ))}
     </ul>
-    <p class="meta">Full widget lives at <a href="/embed/">/embed/</a> — link back with “Powered by VatSnap” so the free ride keeps going. ♥</p>
+    <p class="meta">Full widget lives at <a href="/embed/">/embed/</a>. ♥</p>
     <p><a class="btn" href="/embed/">Open the standalone widget</a></p>
   </div>
+  <script is:inline>
+    (function () {
+      var btn = document.querySelector('[data-copy-snippet]');
+      var status = document.querySelector('[data-copy-status]');
+      var pre = document.getElementById('embed-snippet');
+      if (!btn || !pre) return;
+      btn.addEventListener('click', function () {
+        var text = pre.textContent || '';
+        function done(ok) {
+          if (status) status.textContent = ok ? 'Copied!' : 'Copy failed — select the code manually.';
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        } else {
+          try {
+            var r = document.createRange();
+            r.selectNodeContents(pre);
+            var s = window.getSelection();
+            if (s) { s.removeAllRanges(); s.addRange(r); }
+            document.execCommand('copy');
+            if (s) s.removeAllRanges();
+            done(true);
+          } catch (e) { done(false); }
+        }
+      });
+    })();
+  </script>
 </BaseLayout>

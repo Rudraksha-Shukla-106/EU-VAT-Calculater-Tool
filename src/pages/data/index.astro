@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { COUNTRIES, DATA_VERSION, DATA_SOURCE, formatRate } from '../../lib/vat';
+---
+<BaseLayout
+  title="EU VAT Rates Dataset (Free Download) | VatSnap"
+  description="Download every EU VAT rate as free CSV or JSON: 27 countries + UK standard and reduced rates. Source: European Commission TEDB."
+  canonicalPath="/data/"
+>
+  <p><a href="/">← VAT calculator</a></p>
+  <h1>EU VAT Rates Dataset (Free Download)</h1>
+  <p class="lede">
+    Every standard and reduced VAT rate on this site in one place — 27 EU
+    countries plus the UK, generated from the same dataset that powers the
+    calculator. Free for any use; please cite the source.
+  </p>
+  <p class="meta">Source: {DATA_SOURCE}, last verified {DATA_VERSION} · Guidance only.</p>
+  <p>
+    <a class="btn" href="/data.csv" download="eu-vat-rates.csv">Download CSV</a>
+    {' '}
+    <a class="btn btn-secondary" href="/data.json" download="eu-vat-rates.json">Download JSON</a>
+  </p>
+
+  <div class="card" aria-label="EU VAT rates dataset">
+    <table class="rates">
+      <thead>
+        <tr><th scope="col">Country</th><th scope="col">Standard</th><th scope="col">Reduced</th><th scope="col">Super-reduced</th><th scope="col">Parking</th><th scope="col">Currency</th></tr>
+      </thead>
+      <tbody>
+        {COUNTRIES.map((c) => (
+          <tr>
+            <th scope="row"><a href={`/vat-rate/${c.slug}/`}>{c.name}</a></th>
+            <td><strong>{formatRate(c.standard)}</strong></td>
+            <td>{c.reduced.length ? c.reduced.map(formatRate).join(', ') : '—'}</td>
+            <td>{c.superReduced != null ? formatRate(c.superReduced) : '—'}</td>
+            <td>{c.parking != null ? formatRate(c.parking) : '—'}</td>
+            <td>{c.currency}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>How to cite this data</h2>
+  <p>
+    “EU VAT rates via VatSnap (https://vatratefinder.com/data/), sourced from
+    the {DATA_SOURCE}, last verified {DATA_VERSION}.” Rates change
+    infrequently but do change — re-download before each filing season and
+    confirm critical figures against the official EU source or your accountant.
+  </p>
+  <p>
+    <a class="btn" href="/">Open the VAT calculator</a>
+  </p>
+</BaseLayout>
