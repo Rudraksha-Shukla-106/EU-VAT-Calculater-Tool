@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { DATA_VERSION, DATA_SOURCE } from '../../lib/vat';
+
+const title = 'Reverse VAT Calculation: Gross to Net Guide | VatSnap';
+const description =
+  'How to extract VAT from a gross price: the formula, worked examples for 19%, 23% and 25.5%, and the free reverse VAT calculator.';
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: 'Reverse VAT Calculation: from Gross Price back to Net + VAT',
+  description,
+  datePublished: '2026-09-24',
+  dateModified: DATA_VERSION,
+  author: { '@type': 'Organization', name: 'VatSnap', url: 'https://vatratefinder.com/' },
+  mainEntityOfPage: 'https://vatratefinder.com/blog/reverse-vat-calculation/',
+};
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://vatratefinder.com/' },
+    { '@type': 'ListItem', position: 2, name: 'Guides', item: 'https://vatratefinder.com/blog/' },
+    { '@type': 'ListItem', position: 3, name: 'Reverse VAT Calculation' },
+  ],
+};
+---
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/blog/reverse-vat-calculation/"
+  schema={[articleSchema, breadcrumbSchema]}
+>
+  <nav aria-label="Breadcrumb">
+    <p class="meta"><a href="/">Home</a> › <a href="/blog/">Guides</a> › Reverse VAT Calculation</p>
+  </nav>
+  <h1>Reverse VAT Calculation: from Gross Price back to Net + VAT</h1>
+  <p class="meta">Last updated: {DATA_VERSION} · Source: {DATA_SOURCE} · 5 min read</p>
+
+  <p class="lede">
+    A reverse VAT calculation starts from the VAT-inclusive (gross) price and
+    extracts the VAT hidden inside it. Use it whenever a supplier quotes you
+    gross prices, or when you need the VAT content of your own shelf prices
+    before filing.
+  </p>
+
+  <h2>The formula</h2>
+  <p>
+    Divide the gross price by one plus the rate (as a decimal) to recover the
+    net amount, then subtract to find the VAT: net = gross ÷ (1 + rate/100),
+    VAT = gross − net. The <a href="/">free VAT calculator</a> does this
+    instantly — choose “Gross (extract VAT)”.
+  </p>
+
+  <h2>Worked examples (from the dataset)</h2>
+  <ul>
+    <li>
+      <strong>Germany, 19%:</strong> €119 gross ÷ 1.19 = €100 net, so the VAT
+      is €19. See the <a href="/vat-rate/germany/">VAT calculator for Germany</a>.
+    </li>
+    <li>
+      <strong>Ireland, 23%:</strong> €123 gross ÷ 1.23 = €100 net, so the VAT
+      is €23. See the <a href="/vat-rate/ireland/">VAT calculator for Ireland</a>.
+    </li>
+    <li>
+      <strong>Finland, 25.5%:</strong> €125.50 gross ÷ 1.255 = €100 net, so
+      the VAT is €25.50. See the
+      <a href="/vat-rate/finland/">VAT calculator for Finland</a>.
+    </li>
+  </ul>
+  <p>
+    The common mistake is taking “19% of the gross” (€119 × 19% = €22.61) —
+    that overstates the VAT, because the 19% applies to the net, not the
+    total. Always divide first.
+  </p>
+
+  <h2>When sellers need this</h2>
+  <p>
+    Check supplier invoices quoted gross, split marketplace payouts into net
+    revenue plus VAT, or verify shelf prices across countries in the
+    <a href="/vat-rate/">full EU VAT rates table</a>. If you sell digitally
+    across borders, read <a href="/blog/oss-vat-explained/">when the EU
+    One-Stop Shop (OSS) covers your sales</a> next.
+  </p>
+
+  <p>
+    <a class="btn" href="/">Open the VAT calculator</a>
+  </p>
+  <p class="meta">
+    Guidance only — examples use standard rates from data tracking the
+    European Commission TEDB. Confirm the rate that applies to your product
+    with your accountant or the official EU source before invoicing.
+  </p>
+</BaseLayout>

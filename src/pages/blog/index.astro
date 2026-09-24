@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { DATA_VERSION } from '../../lib/vat';
+
+const posts = [
+  {
+    href: '/blog/oss-vat-explained/',
+    title: 'OSS VAT Explained: the EU One-Stop Shop for Small Sellers',
+    blurb:
+      'Sell to buyers in other EU countries without registering for VAT in each one. How the One-Stop Shop works, who it suits, and where to find each rate.',
+  },
+  {
+    href: '/blog/reverse-vat-calculation/',
+    title: 'Reverse VAT Calculation: from Gross Price back to Net + VAT',
+    blurb:
+      'Given a VAT-inclusive shelf price, recover the net amount and the VAT hidden inside it — the formula, worked examples, and the one-click way.',
+  },
+];
+---
+<BaseLayout
+  title="VAT Guides for Small Online Sellers | VatSnap"
+  description="Short VAT guides for Etsy, Shopify and freelance sellers: the EU One-Stop Shop and reverse VAT calculation. Free calculator included."
+  canonicalPath="/blog/"
+>
+  <p><a href="/">← VAT calculator</a></p>
+  <h1>VAT guides for small online sellers</h1>
+  <p class="lede">
+    Short, practical guides for sellers who ship or sell digitally into the EU.
+    Every rate mentioned is drawn from data tracking the European Commission
+    TEDB (last verified {DATA_VERSION}). Guidance only — confirm with your
+    accountant before filing.
+  </p>
+  <div class="grid grid-2">
+    {posts.map((p) => (
+      <div class="card">
+        <h2 style="font-size: 1.15rem"><a href={p.href}>{p.title}</a></h2>
+        <p>{p.blurb}</p>
+        <p><a class="btn btn-secondary" href={p.href}>Read the guide</a></p>
+      </div>
+    ))}
+  </div>
+  <p style="margin-top: 24px">
+    Need a number right now? <a class="btn" href="/">Open the VAT calculator</a>
+  </p>
+</BaseLayout>

@@ -1,0 +1,97 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { DATA_VERSION, DATA_SOURCE } from '../../lib/vat';
+
+const title = 'OSS VAT Explained: EU One-Stop Shop Guide | VatSnap';
+const description =
+  'What the EU VAT One-Stop Shop (OSS) is, who can use it, and how to find each buyer-country rate. For Etsy, Shopify and freelance sellers.';
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: 'OSS VAT Explained: the EU One-Stop Shop for Small Sellers',
+  description,
+  datePublished: '2026-09-24',
+  dateModified: DATA_VERSION,
+  author: { '@type': 'Organization', name: 'VatSnap', url: 'https://vatratefinder.com/' },
+  mainEntityOfPage: 'https://vatratefinder.com/blog/oss-vat-explained/',
+};
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://vatratefinder.com/' },
+    { '@type': 'ListItem', position: 2, name: 'Guides', item: 'https://vatratefinder.com/blog/' },
+    { '@type': 'ListItem', position: 3, name: 'OSS VAT Explained' },
+  ],
+};
+---
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/blog/oss-vat-explained/"
+  schema={[articleSchema, breadcrumbSchema]}
+>
+  <nav aria-label="Breadcrumb">
+    <p class="meta"><a href="/">Home</a> › <a href="/blog/">Guides</a> › OSS VAT Explained</p>
+  </nav>
+  <h1>OSS VAT Explained: the EU One-Stop Shop for Small Sellers</h1>
+  <p class="meta">Last updated: {DATA_VERSION} · Source: {DATA_SOURCE} · 6 min read</p>
+
+  <p class="lede">
+    If you sell to consumers in other EU countries — on Etsy, Shopify, or as a
+    freelancer selling downloads — the EU One-Stop Shop (OSS) lets you report
+    that VAT through a single return in your home country instead of
+    registering for VAT in every country you sell into.
+  </p>
+
+  <h2>What the OSS is</h2>
+  <p>
+    The One-Stop Shop is an EU-wide filing scheme for cross-border
+    business-to-consumer (B2C) sales. You register once, charge the buyer's
+    country VAT rate on each sale, and declare it all on one OSS return. It
+    most commonly covers B2C goods and digital services — for example an
+    Etsy printable sold from Germany to a buyer in
+    <a href="/vat-rate/france/">France (20% standard rate)</a>.
+  </p>
+
+  <h2>Who it suits</h2>
+  <p>
+    It suits small sellers with cross-border consumer sales who would
+    otherwise face a registration in each buyer's country. Separate local
+    registrations are still needed in some cases — for example if you hold
+    stock in another country — so confirm your position with an accountant.
+    Sales to VAT-registered businesses in another EU country are generally
+    handled differently (often zero-rated with reverse charge).
+  </p>
+
+  <h2>Which rate to charge on each sale</h2>
+  <p>
+    Under OSS you still charge the buyer's country rate — the scheme changes
+    where you report, not which rate applies. Look up the destination in the
+    <a href="/vat-rate/">full EU VAT rates table (all 27 countries + UK)</a>:
+    for instance <a href="/vat-rate/germany/">Germany charges 19%</a>,
+    <a href="/vat-rate/ireland/">Ireland 23%</a>, and
+    <a href="/vat-rate/hungary/">Hungary 27%</a>. Then compute the
+    VAT-inclusive price with the <a href="/">free VAT calculator</a>, or check
+    <a href="/blog/reverse-vat-calculation/">how to reverse-calculate VAT</a>
+    when a supplier quotes you gross prices.
+  </p>
+
+  <h2>How to get started</h2>
+  <p>
+    Registration runs through your own country's tax portal, and returns are
+    typically filed quarterly. Keep per-country sales records so each line of
+    the return matches the rate you charged. Your accountant can confirm
+    whether your products and customer types qualify before your first
+    filing.
+  </p>
+
+  <p>
+    <a class="btn" href="/">Open the VAT calculator</a>
+  </p>
+  <p class="meta">
+    Guidance only — this guide explains general principles, not your tax
+    position. Confirm with your accountant or the official EU source before
+    registering or filing.
+  </p>
+</BaseLayout>
