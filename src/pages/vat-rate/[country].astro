@@ -31,14 +31,72 @@ const paras = DESCRIPTIONS[c.slug] ?? [];
 const isGB = c.code === 'GB';
 const displayName = isGB ? `${c.name} (non-EU, shown for reference)` : c.name;
 const year = (DATA_VERSION || '2026').slice(0, 4);
-const title = `${c.name} VAT Rate ${year} — ${formatRate(c.standard)} Standard Rate | VatSnap`;
-const description = `${c.name} standard VAT rate is ${formatRate(c.standard)}${c.reduced.length ? `, with reduced rates of ${c.reduced.map(formatRate).join(', ')}` : ', with no reduced rates'} (last verified ${DATA_VERSION}). Free calculator for sellers shipping to ${c.name}.`;
+
+// SEO title pattern: "VAT Rate in {Country} 2026: {standard}% | VatSnap" (max ~60 chars).
+const title = `VAT Rate in ${c.name} ${year}: ${formatRate(c.standard)} | VatSnap`;
+
+// SEO description pattern (max ~155 chars, never truncated mid-word).
+function buildDescription(): string {
+  const reducedList = c.reduced.length ? c.reduced.map(formatRate).join(', ') : 'none';
+  const full = `${c.name} standard VAT is ${formatRate(c.standard)} (reduced: ${reducedList}). Free ${c.name} VAT calculator: add or remove VAT instantly. Rates verified ${DATA_VERSION}.`;
+  if (full.length <= 155) return full;
+  const short = `${c.name} standard VAT is ${formatRate(c.standard)} (${c.reduced.length} reduced rates). Free ${c.name} VAT calculator: add or remove VAT instantly. Rates verified ${DATA_VERSION}.`;
+  if (short.length <= 155) return short;
+  // Fallback: drop the "instantly" clause, cut at last space before the limit.
+  const fallback = `${c.name} VAT: ${formatRate(c.standard)} standard. Free ${c.name} VAT calculator. Rates verified ${DATA_VERSION}.`;
+  if (fallback.length <= 155) return fallback;
+  return fallback.slice(0, 152).split(' ').slice(0, -1).join(' ') + '…';
+}
+const description = buildDescription();
 
 const reducedText = c.reduced.length ? c.reduced.map(formatRate).join(', ') : 'none';
+// Neighbouring / nearby countries for the "Related countries" block (3-4 each).
+const NEIGHBOURS: Record<string, string[]> = {
+  austria: ['germany', 'italy', 'hungary', 'czech-republic'],
+  belgium: ['netherlands', 'france', 'germany', 'luxembourg'],
+  bulgaria: ['romania', 'greece', 'hungary', 'croatia'],
+  cyprus: ['greece', 'malta', 'italy', 'spain'],
+  'czech-republic': ['germany', 'austria', 'poland', 'slovakia'],
+  germany: ['france', 'netherlands', 'austria', 'poland'],
+  denmark: ['germany', 'sweden', 'netherlands', 'finland'],
+  estonia: ['latvia', 'lithuania', 'finland', 'sweden'],
+  spain: ['france', 'portugal', 'italy', 'germany'],
+  finland: ['sweden', 'estonia', 'germany', 'denmark'],
+  france: ['germany', 'spain', 'italy', 'belgium'],
+  'united-kingdom': ['ireland', 'france', 'netherlands', 'germany'],
+  greece: ['bulgaria', 'italy', 'spain', 'croatia'],
+  croatia: ['slovenia', 'hungary', 'italy', 'austria'],
+  hungary: ['austria', 'romania', 'slovakia', 'croatia'],
+  ireland: ['united-kingdom', 'france', 'netherlands', 'germany'],
+  italy: ['france', 'germany', 'spain', 'austria'],
+  lithuania: ['latvia', 'estonia', 'poland', 'sweden'],
+  luxembourg: ['belgium', 'france', 'germany', 'netherlands'],
+  latvia: ['lithuania', 'estonia', 'finland', 'sweden'],
+  malta: ['italy', 'spain', 'greece', 'cyprus'],
+  netherlands: ['belgium', 'germany', 'france', 'luxembourg'],
+  poland: ['germany', 'czech-republic', 'slovakia', 'lithuania'],
+  portugal: ['spain', 'france', 'italy', 'ireland'],
+  romania: ['bulgaria', 'hungary', 'poland', 'croatia'],
+  sweden: ['denmark', 'finland', 'germany', 'estonia'],
+  slovenia: ['austria', 'italy', 'croatia', 'hungary'],
+  slovakia: ['czech-republic', 'austria', 'hungary', 'poland'],
+};
+const neighbourSlugs = NEIGHBOURS[c.slug] ?? [];
+const neighbours = neighbourSlugs
+  .map((s) => COUNTRIES.find((o) => o.slug === s))
+  .filter((o): o is (typeof COUNTRIES)[number] => Boolean(o));
+// EU range comparison sentence (Luxembourg 17% lowest … Hungary 27% highest).
+const rangeNote = isGB
+  ? `For comparison, EU headline rates run from 17% (Luxembourg) to 27% (Hungary).`
+  : c.standard === 17
+    ? `At ${formatRate(c.standard)} it shares the lowest headline rate in the EU (EU range: 17%–27%).`
+    : c.standard === 27
+      ? `At ${formatRate(c.standard)} it is the highest headline rate in the EU (EU range: 17%–27%).`
+      : `That sits inside the EU headline range of 17% (Luxembourg) to 27% (Hungary).`;
 const faqItems = [
   {
     q: `What is the standard VAT rate in ${c.name}?`,
-    a: `The standard VAT rate in ${c.name} (${c.vatName}, ${c.vatAbbr}) is ${formatRate(c.standard)}, according to the eu-vat-rates-data package (source: ${DATA_SOURCE}, last verified ${DATA_VERSION}). Most goods sold to ${c.name === 'United Kingdom' ? 'British' : c.name} customers use this rate.`,
+    a: `The standard VAT rate in ${c.name} (${c.vatName}, ${c.vatAbbr}) is ${formatRate(c.standard)}, according to data tracking the ${DATA_SOURCE} (last verified ${DATA_VERSION}). Most goods sold to ${c.name === 'United Kingdom' ? 'British' : c.name} customers use this rate.`,
   },
   {
     q: c.reduced.length
@@ -93,11 +151,15 @@ const exampleVat = (exampleNet * c.standard) / 100;
   canonicalPath={`/vat-rate/${c.slug}/`}
   schema={[appSchema, faqSchema, breadcrumbSchema]}
 >
-  <p><a href="/vat-rate/">← All countries</a></p>
-  <h1><span class="flag" aria-hidden="true">{c.flag}</span> {displayName}: {formatRate(c.standard)} VAT</h1>
-  <p class="meta">
-    {c.vatName} ({c.vatAbbr}) · Currency: {c.currency} · Last verified: {DATA_VERSION} · Source: {DATA_SOURCE}
+  <p><a href="/vat-rate/">← All countries</a> · <a href="/">VAT calculator</a></p>
+  <h1>VAT Calculator for {displayName}</h1>
+  <p class="lede">
+    {c.name}'s standard VAT rate ({c.vatName}, {c.vatAbbr}) is {formatRate(c.standard)}{c.reduced.length ? `, with ${c.reduced.length} reduced rate${c.reduced.length === 1 ? '' : 's'} (${reducedText})` : ' and no reduced rates'}. {rangeNote}
   </p>
+  <p class="meta">
+    Currency: {c.currency} · Rates last verified: {DATA_VERSION} · Source: {DATA_SOURCE}
+  </p>
+  <p class="meta">Guidance only — confirm with your accountant or the official EU source before filing or invoicing.</p>
 
   <div class="card" aria-label="Rate summary">
     <table class="rates">
@@ -127,9 +189,9 @@ const exampleVat = (exampleNet * c.standard) / 100;
     ))}
   </div>
 
-  <h2>Other countries</h2>
+  <h2>Related countries</h2>
   <ul class="country-list">
-    {COUNTRIES.filter((o) => o.code !== c.code).slice(0, 8).map((o) => (
+    {neighbours.map((o) => (
       <li>
         <a href={`/vat-rate/${o.slug}/`} style={`--w: ${Math.round((o.standard / 27) * 100)}%; --tint: ${o.standard < 20 ? 'var(--tint-low)' : o.standard > 23 ? 'var(--tint-high)' : 'var(--tint-mid)'};`}>
           <span class="bar" aria-hidden="true"></span>
@@ -141,4 +203,11 @@ const exampleVat = (exampleNet * c.standard) / 100;
     ))}
   </ul>
   <p><a href="/vat-rate/">See all {COUNTRIES.length} countries →</a></p>
+
+  <h2>VAT guides for sellers</h2>
+  <p>
+    Selling across borders? Read <a href="/blog/oss-vat-explained/">when the EU One-Stop Shop (OSS) covers your sales</a>
+    and <a href="/blog/reverse-vat-calculation/">how to reverse-calculate VAT from a gross price</a> —
+    or <a href="/">open the VAT calculator</a> to price your next sale to {c.name}.
+  </p>
 </BaseLayout>
