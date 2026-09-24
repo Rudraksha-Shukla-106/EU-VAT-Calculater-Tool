@@ -3,6 +3,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import VatCalculator from '../components/VatCalculator.astro';
 import { COUNTRIES, DATA_VERSION, DATA_SOURCE } from '../lib/vat';
 
+const webSiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'VatSnap',
+  url: 'https://vatratefinder.com/',
+  description:
+    'Free EU VAT calculator for small online sellers. Look up VAT rates for all 27 EU countries plus the UK and compute VAT-inclusive and exclusive prices.',
+};
+
 const webAppSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
@@ -25,7 +34,7 @@ const faqs = [
   },
   {
     q: 'What is the VAT rate in France?',
-    a: 'The standard VAT rate in France (TVA) is 20%, with additional reduced rates of 10% and 5.5%, plus a 2.1% super-reduced rate. Corsica and the overseas departments apply their own special rates. See the <a href="/vat-rate/france/">VAT calculator for France</a> for the full breakdown.',
+    a: 'The standard VAT rate in France (TVA) is 20%, with reduced rates of 0.9%, 1.05%, 5.5%, 8.5%, 10% and 13%, plus a 2.1% super-reduced rate. Some of these special rates apply only in Corsica and the overseas departments rather than on the mainland, so check the place of supply before assuming 20% everywhere. See the <a href="/vat-rate/france/">VAT calculator for France</a> for the full breakdown.',
   },
   {
     q: 'How do I calculate VAT from a price?',
@@ -45,7 +54,7 @@ const faqs = [
   },
   {
     q: 'Is there a free VAT calculator?',
-    a: 'Yes — this one. VatSnap is a free VAT calculator with no signup, no usage limits and no paid tier. It runs entirely in your browser using VAT rates bundled from the open-source eu-vat-rates-data package (source: European Commission TEDB).',
+    a: 'Yes — this one. VatSnap is a free VAT calculator with no signup, no usage limits and no paid tier. It runs entirely in your browser using VAT rates sourced from the European Commission TEDB.',
   },
   {
     q: 'What is the OSS (One Stop Shop) scheme?',
@@ -69,7 +78,7 @@ const faqs = [
   },
   {
     q: 'How often do EU VAT rates change?',
-    a: `National VAT rates change infrequently, but they do change — which is why VatSnap reads every number from the eu-vat-rates-data package instead of hardcoding them. The package is checked against the EU TEDB source, and the rates on this site were last verified ${DATA_VERSION}.`,
+    a: `National VAT rates change infrequently, but they do change — which is why VatSnap reads every rate from an official-source dataset instead of hardcoding them. The data is checked against the EU TEDB source, and the rates on this site were last verified ${DATA_VERSION}.`,
   },
   {
     q: 'Do I charge VAT to non-EU customers?',
@@ -81,7 +90,7 @@ const faqs = [
   },
   {
     q: 'Where do the VAT rates on this site come from?',
-    a: `Every rate comes from the eu-vat-rates-data package, which tracks the European Commission TEDB. The rates on this page were last verified ${DATA_VERSION}. Rates are guidance only — confirm with your accountant or the official EU source before filing. Browse all rates in the <a href="/vat-rate/">VAT calculator Europe index</a>.`,
+    a: `Every rate comes from data tracking the European Commission TEDB. The rates on this page were last verified ${DATA_VERSION}. Rates are guidance only — confirm with your accountant or the official EU source before filing. Browse all rates in the <a href="/vat-rate/">VAT calculator Europe index</a>.`,
   },
 ];
 
@@ -105,10 +114,10 @@ function width(standard: number): string {
 }
 ---
 <BaseLayout
-  title="VAT Calculator | Free EU VAT Calculator by Country – VatSnap"
-  description="Free VAT calculator for Europe: look up EU VAT rates by country and compute VAT-inclusive and exclusive prices. Built for Etsy, Shopify sellers and freelancers."
+  title="Free EU VAT Calculator by Country | VatSnap"
+  description="Free EU VAT calculator: rates for all 27 EU countries + UK. Enter a price to add or remove VAT instantly. Built for Etsy & Shopify sellers."
   canonicalPath="/"
-  schema={[webAppSchema, faqSchema]}
+  schema={[webSiteSchema, webAppSchema, faqSchema]}
 >
   <div class="hero">
     <svg class="hero-motif" viewBox="0 0 520 360" aria-hidden="true" focusable="false">

@@ -4,7 +4,7 @@ import { COUNTRIES, DATA_VERSION } from '../lib/vat';
 ---
 <BaseLayout
   title="About Us — VatSnap, Free Unofficial EU VAT Tool"
-  description="About VatSnap: a free, unofficial EU VAT rate calculator for small online sellers. Rates come from the open-source eu-vat-rates-data package (EU TEDB source)."
+  description="About VatSnap: a free, unofficial EU VAT rate calculator for small online sellers. Rates track the European Commission TEDB."
   canonicalPath="/about/"
 >
   <h1>About Us</h1>
@@ -22,11 +22,10 @@ import { COUNTRIES, DATA_VERSION } from '../lib/vat';
     </p>
     <h2>Where the numbers come from</h2>
     <p>
-      Every rate on this site is bundled at build time from the open-source
-      <code>eu-vat-rates-data</code> npm package, which tracks the European
-      Commission's Taxes in Europe Database (TEDB). No rate is ever typed by
-      hand into the UI — the calculator reads the dataset directly, so updates
-      to the package flow straight through on the next build.
+      Every rate on this site is bundled at build time from open data tracking
+      the European Commission's Taxes in Europe Database (TEDB). No rate is ever
+      typed by hand into the UI — the calculator reads the dataset directly, so
+      updates flow straight through on the next build.
       Rates shown were last verified {DATA_VERSION}.
     </p>
     <h2>Important disclaimer</h2>

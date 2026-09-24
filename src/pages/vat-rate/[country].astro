@@ -74,6 +74,15 @@ const appSchema = {
   offers: { '@type': 'Offer', price: '0', priceCurrency: c.currency },
   description,
 };
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://vatratefinder.com/' },
+    { '@type': 'ListItem', position: 2, name: 'EU VAT Rates', item: 'https://vatratefinder.com/vat-rate/' },
+    { '@type': 'ListItem', position: 3, name: `${c.name} VAT Rate` },
+  ],
+};
 const exampleNet = 100;
 const exampleVat = (exampleNet * c.standard) / 100;
 ---
@@ -82,7 +91,7 @@ const exampleVat = (exampleNet * c.standard) / 100;
   title={title}
   description={description}
   canonicalPath={`/vat-rate/${c.slug}/`}
-  schema={[appSchema, faqSchema]}
+  schema={[appSchema, faqSchema, breadcrumbSchema]}
 >
   <p><a href="/vat-rate/">← All countries</a></p>
   <h1><span class="flag" aria-hidden="true">{c.flag}</span> {displayName}: {formatRate(c.standard)} VAT</h1>

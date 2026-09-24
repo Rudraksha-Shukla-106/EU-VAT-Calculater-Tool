@@ -1,30 +1,86 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { COUNTRIES } from '../../lib/vat';
+import { COUNTRIES, DATA_VERSION, DATA_SOURCE, formatRate } from '../../lib/vat';
 
-function band(standard: number): string {
-  if (standard < 20) return 'var(--tint-low)';
-  if (standard > 23) return 'var(--tint-high)';
-  return 'var(--tint-mid)';
+const year = (DATA_VERSION || '2026').slice(0, 4);
+const title = `EU VAT Rates ${year}: All 27 Countries + UK | VatSnap`;
+const description = `Standard and reduced VAT rates for every EU country in ${year}, plus the UK. Click any country for its VAT calculator. Rates verified ${DATA_VERSION}.`;
+
+const euOnly = COUNTRIES.filter((c) => c.code !== 'GB');
+const highest = euOnly.reduce((a, b) => (b.standard > a.standard ? b : a));
+const lowest = euOnly.reduce((a, b) => (b.standard < a.standard ? b : a));
+
+function reducedCell(c: (typeof COUNTRIES)[number]): string {
+  const parts = c.reduced.map(formatRate);
+  if (c.superReduced != null) parts.push(`${formatRate(c.superReduced)} super-reduced`);
+  if (c.parking != null) parts.push(`${formatRate(c.parking)} parking`);
+  return parts.length ? parts.join(', ') : '—';
 }
 ---
 <BaseLayout
-  title="All EU VAT Rates 2026 — VatSnap"
-  description="Standard and reduced VAT rates for all 27 EU member states plus the UK, sourced from the official EU TEDB dataset. Pick a country for its calculator and FAQ."
+  title={title}
+  description={description}
   canonicalPath="/vat-rate/"
 >
-  <h1>All country VAT rates</h1>
-  <p class="lede">Every rate below comes straight from the <code>eu-vat-rates-data</code> package (EU TEDB source). Click through for the calculator, explanation and FAQs.</p>
-  <ul class="country-list">
-    {COUNTRIES.map((c) => (
-      <li>
-        <a href={`/vat-rate/${c.slug}/`} style={`--w: ${Math.round((c.standard / 27) * 100)}%; --tint: ${band(c.standard)};`}>
-          <span class="bar" aria-hidden="true"></span>
-          <span class="flag" aria-hidden="true">{c.flag}</span>
-          <span class="rate-name">{c.name}{c.code === 'GB' ? ' (non-EU)' : ''}<small>{c.reduced.length ? `Reduced ${c.reduced.join('%, ')}%` : 'No reduced rates'}</small></span>
-          <span class="rate-num">{c.standard}%</span>
-        </a>
-      </li>
-    ))}
-  </ul>
+  <p><a href="/">← VAT calculator</a></p>
+  <h1>EU VAT rates {year}: all 27 countries + UK</h1>
+  <p class="lede">
+    Standard and reduced VAT rates for every EU member state in {year}, plus the
+    United Kingdom for reference. Select any country for its dedicated VAT
+    calculator, full rate breakdown and answers to common questions.
+  </p>
+  <p class="meta">
+    Rates last verified: {DATA_VERSION} · Source: {DATA_SOURCE} ·
+    Guidance only — confirm with your accountant or the official EU source before filing.
+  </p>
+
+  <div class="card" aria-label="All EU VAT rates">
+    <table class="rates">
+      <thead>
+        <tr><th scope="col">Country</th><th scope="col">Standard rate</th><th scope="col">Reduced rates</th></tr>
+      </thead>
+      <tbody>
+        {COUNTRIES.map((c) => (
+          <tr>
+            <th scope="row"><a href={`/vat-rate/${c.slug}/`}>{c.name}{c.code === 'GB' ? ' (non-EU)' : ''}</a></th>
+            <td><strong>{formatRate(c.standard)}</strong></td>
+            <td>{reducedCell(c)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Highest and lowest standard rates in the EU</h2>
+  <p>
+    Highest: <a href={`/vat-rate/${highest.slug}/`}>{highest.name} {formatRate(highest.standard)}</a> —
+    Lowest: <a href={`/vat-rate/${lowest.slug}/`}>{lowest.name} {formatRate(lowest.standard)}</a>.
+    Every other EU member state falls somewhere between the two, so the gap between the
+    cheapest and most expensive headline rate is {highest.standard - lowest.standard} percentage points.
+  </p>
+
+  <h2>Standard vs reduced rates</h2>
+  <p>
+    The standard rate is the default: most goods and services sold to consumers in a
+    country carry it. Reduced rates are exceptions written into national law for specific
+    categories — everyday essentials, books, hospitality and similar cases. A reduced rate
+    never applies automatically: unless your product falls squarely inside a category your
+    country's law names, you charge the standard rate. Each country page above lists every
+    reduced, super-reduced and parking rate in the dataset so you can check line by line.
+  </p>
+
+  <h2>How often do rates change?</h2>
+  <p>
+    National VAT rates change infrequently, but they do change — a standard rate can move
+    by a point or a reduced band can be added or removed in a budget. VatSnap reads every
+    number on this page from data tracking the {DATA_SOURCE}, last verified {DATA_VERSION},
+    instead of hardcoding them. Still, rates are guidance only: confirm the current rate
+    with your accountant or the official EU source before invoicing or filing.
+  </p>
+
+  <p>
+    <a class="btn" href="/">Open the VAT calculator</a>
+    {' '}
+    <a class="btn btn-secondary" href="/blog/">Read the VAT guides</a>
+  </p>
 </BaseLayout>
